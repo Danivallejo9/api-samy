@@ -91,7 +91,7 @@ final class OrderRepository implements OrderInterface
       'UnoEE.dbo.VWS_PEDIDOS.ESTADO AS status',
       DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_PEDIDO) as release_date'),
       DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_CREACION) AS release_order'), //FECHA_ORDEN no existe en la nueva tabla, se usa FECHA_CREACION
-      DB::raw('"" AS deliver_start'), //  DB::raw('CONVERT(date, samy.PEDIDO.FECHA_PROX_EMBARQU) AS deliver_start'),
+      DB::raw("'' AS deliver_start"), //  DB::raw('CONVERT(date, samy.PEDIDO.FECHA_PROX_EMBARQU) AS deliver_start'),
       DB::raw('CONVERT(date, DR.RemesaFechaEntrega) AS deliver_end'),
       'DR.Remesa as remittance',
       'DR.Estado as status_remittance'
