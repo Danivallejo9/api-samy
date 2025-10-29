@@ -88,17 +88,27 @@ final class OrderRepository implements OrderInterface
     $order = Order::select(
       'C.NOMBRE_CLIENTE AS nombre',
       'UnoEE.dbo.VWS_PEDIDOS.PEDIDO_SIESA AS n_order',
-      'UnoEE.dbo.VWS_PEDIDOS.ESTADO AS status',
+      DB::raw("
+        CASE UnoEE.dbo.VWS_PEDIDOS.ESTADO
+          WHEN 0 THEN 'Retenido'
+          WHEN 1 THEN 'Facturado'
+          WHEN 2 THEN 'Aprobado'
+          WHEN 3 THEN 'Comprometido'
+          WHEN 4 THEN 'Facturado'
+          ELSE 'Desconocido'
+        END AS status
+      "),
       DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_PEDIDO) as release_date'),
-      DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_CREACION) AS release_order'), //FECHA_ORDEN no existe en la nueva tabla, se usa FECHA_CREACION
-      DB::raw("'' AS deliver_start"), //  DB::raw('CONVERT(date, samy.PEDIDO.FECHA_PROX_EMBARQU) AS deliver_start'),
+      DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_CREACION) AS release_order'),  //FECHA_ORDEN no existe en la nueva tabla, se usa FECHA_CREACION
+      DB::raw('CONVERT(date, UnoEE.dbo.VWS_PEDIDOS.FECHA_PROX_EMBARQU) AS deliver_start'),
       DB::raw('CONVERT(date, DR.RemesaFechaEntrega) AS deliver_end'),
       'DR.Remesa as remittance',
       'DR.Estado as status_remittance'
-    )->join('UnoEE.dbo.VWS_GBICLIENTES AS C', 'C.CLIENTE', '=', 'UnoEE.dbo.VWS_PEDIDOS.CLIENTE_SUC')
-      ->leftJoin('UnoEE.dbo.TIC_DOCUMENTOSREMESAS AS DR', 'DR.PedidoId', '=', 'UnoEE.dbo.VWS_PEDIDOS.PEDIDO_SIESA')
-      ->where('UnoEE.dbo.VWS_PEDIDOS.PEDIDO_SIESA', '=', $order)
-      ->get();
+    )
+    ->join('UnoEE.dbo.VWS_GBICLIENTES AS C', 'C.CLIENTE', '=', 'UnoEE.dbo.VWS_PEDIDOS.CLIENTE_SUC')
+    ->leftJoin('UnoEE.dbo.TIC_DOCUMENTOSREMESAS AS DR', 'DR.PedidoId', '=', 'UnoEE.dbo.VWS_PEDIDOS.PEDIDO_SIESA')
+    ->where('UnoEE.dbo.VWS_PEDIDOS.PEDIDO_SIESA', '=', $order)
+    ->get();
 
     return response()->json($order->toArray());
   }
